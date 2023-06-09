@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Photo Editor</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/debug.css">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+</head>
+
+<body>
+    <div id="effects">
+        <p class="title">
+            Effects
+        </p>
+        <div class="items">
+
+        </div>
+    </div>
+    <div id="controls">
+        <img src="../images/brush.png" alt="draw" id="draw">
+        <img src="../images/eraser.png" alt="IMG" id="erase">
+        <img src="../images/paint.png" alt="IMG" id="fill">
+    </div>
+    <div id="canvas-backdrop">
+        <canvas id="default_canvas"></canvas>
+    </div>
+
+    <div id="canvas-properties">
+        <div id="zoom-label" contentEditable=true>
+            100%
+        </div>
+    </div>
+
+    <div id="debug">
+        <p id="down"></p>
+        <p id="moving"></p>
+        <p id="exists"></p>
+        <p id="size"></p>
+    </div>
+
+    <div id="properties">
+        <p class="title">
+            Properties
+        </p>
+        <div class="items">
+
+        </div>
+    </div>
+    <div id="layers">
+        <p class="title">
+            Layers
+        </p>
+        <div id="items">
+
+        </div>
+    </div>
+
+    <div id="layer-controls">
+        <img id="add_layer" src="../images/plus.png" alt="+">
+        <img id="remove_layer" src="../images/x.png" alt="x">
+    </div>
+
+
+    <script src="../js/backend.js"></script>
+    <script src="../js/controls.js"></script>
+    <script src="../js/backCSS.js"></script>
+    <script src="../js/core.js"></script>
+</body>
+
+</html>
