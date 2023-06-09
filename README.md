@@ -11,12 +11,6 @@ The Image Editor is a software application designed to manipulate and enhance di
 - **Image Editing**: Allows users to perform various editing operations on images, such as cropping, rotating, resizing, and flipping.
 - **Filters and Effects**: Provides a collection of filters and effects to enhance the visual appearance of images, including adjustments to brightness, contrast, saturation, and color balance.
 - **Drawing and Painting**: Offers tools for drawing and painting on images, including brush strokes, shapes, and text overlays.
-- **Selection and Masking**: Enables users to select specific regions of an image for further editing or to apply filters and effects selectively.
-- **Layers and Blending**: Supports the use of layers to organize and stack multiple image elements, with blending modes to achieve different visual effects.
-- **Undo and Redo**: Allows users to easily undo and redo previous editing actions, providing flexibility and non-destructive editing capabilities.
-- **Save and Export**: Enables users to save their edited images in various formats, such as JPEG, PNG, or GIF, and export them to different locations, including local storage or cloud services.
-- **Batch Processing**: Provides the ability to apply the same editing operations to multiple images simultaneously, streamlining the workflow for bulk image editing tasks.
-- **Keyboard Shortcuts**: Includes a set of keyboard shortcuts to expedite common editing tasks and improve user productivity.
 
 ## Installation
 
