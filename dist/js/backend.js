@@ -15,8 +15,6 @@ let cS = window.getComputedStyle(default_canvas);
 let w = parseInt(cS.width.replace("px", ""));
 let h = parseInt(cS.height.replace("px", ""));
 
-// Define the size of the canvas
-const canvasSize = 400;
 default_canvas.width = w;
 default_canvas.height = h;
 
@@ -24,7 +22,7 @@ let canvases = [];
 let currentSelected = null;
 
 // Define the size of each square in the checkered pattern
-const squareSize = 10;
+const squareSize = 5;
 
 // Variables to keep track of the current square position
 let x = 0;
@@ -37,9 +35,9 @@ let isBlack = true;
 while (y < h) { //replaced canvasSize with h
     while (x < w) { //replaced canvasSize with w
         if (isBlack) {
-            ctx.fillStyle = "#7d7d7d77";
+            ctx.fillStyle = "rgb(50,50,50)";
         } else {
-            ctx.fillStyle = "#ffffff77";
+            ctx.fillStyle = "rgb(125,125,125)";
         }
 
         ctx.fillRect(x, y, squareSize, squareSize);
@@ -102,8 +100,8 @@ function refresh() {
 
     let zoomfunc = (data) => {
         uneditTextHandler(data);
-        if (zoom_label.textContent.length <= 1 || !zoom_label.textContent.includes("%") || isNaN(zoom_label.textContent.replace("%", ""))) {
-            zoom_label.textContent = "100%";
+        if (zoom_label.value.length <= 1 || !zoom_label.value.includes("%") || isNaN(zoom_label.value.replace("%", "")) || !zoom_label.value.endsWith("%")) {
+            zoom_label.value = "100%";
         }
     }
     zoom_label.removeEventListener("dblclick", editTextHandler);
@@ -132,7 +130,7 @@ function refresh() {
     default_canvas.height = h;
 
     // Define the size of each square in the checkered pattern
-    const squareSize = 10;
+    const squareSize = 5;
 
     // Variables to keep track of the current square position
     let x = 0;
@@ -149,10 +147,10 @@ function refresh() {
         for (let col = 0; col < w; col += squareSize) {
             if ((row / squareSize) % 2 === 0) {
                 // Even rows
-                ctx.fillStyle = (col / squareSize) % 2 === 0 ? "#7d7d7d77" : "#ffffff77";
+                ctx.fillStyle = (col / squareSize) % 2 === 0 ? "#aaaaaa22" : "#ffffff77";
             } else {
                 // Odd rows
-                ctx.fillStyle = (col / squareSize) % 2 === 0 ? "#ffffff77" : "#7d7d7d77";
+                ctx.fillStyle = (col / squareSize) % 2 === 0 ? "#ffffff77" : "#7d7d7d44";
             }
 
             ctx.fillRect(col, row, squareSize, squareSize);

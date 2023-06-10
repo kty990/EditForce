@@ -10,7 +10,8 @@ const resize = () => {
     // Compare the values and find the smallest
     const smallestValue = Math.min(oneVhInPixels, oneVwInPixels);
     document.documentElement.style.setProperty("--vwh", `${smallestValue}px`);
-    console.log(smallestValue, 'px');
 };
 
 window.onresize = resize;
+
+resize();

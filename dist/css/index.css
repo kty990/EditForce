@@ -10,6 +10,7 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #3b3b3b;
+    /* background-color: #ffffff; */
     font-family: Arial, sans-serif;
 }
 
@@ -107,7 +108,7 @@ img {
     display: block;
     width: 57vw;
     height: 90vh;
-    background-color: #00000000;
+    background-color: transparent;
     position: fixed;
     left: 21.5vw;
     top: 2.5vh;
@@ -274,60 +275,69 @@ img {
 
 #canvas-properties {
     position: fixed;
-    left: 21.25vw;
-    width: 57.16vw;
-    top: 92.6vh;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: right;
+    align-items: center;
+    left: 18vw;
+    width: 62vw;
+    top: 0;
     background-color: #313131;
-    padding-bottom: 0.3vh;
-    border-style: solid;
-    border-width: 3px;
-    border-color: #000;
     overflow: hidden;
+    height: 1.9vh;
 }
 
 #zoom-label {
     color: #fff;
     width: 2.5vw;
-    font-size: 1.2vh;
+    height: 100%;
+    font-size: calc(var(--vwh, 1vh) * 1.17);
     text-align: center;
     background-color: #4949497d;
-    border-style: solid;
-    border-width: 3px;
-    border-top-style: none;
-    border-bottom-style: none;
-    border-color: #000;
-    margin: 0;
-    padding: 0.1vw;
-    padding-right: 0;
-    position: relative;
-    bottom: 0.05vw;
-    margin-left: auto;
     font-family: 'Times New Roman', Times, serif;
-}
-
-#zoom-label:hover {
-    border-color: #E59700;
+    border-style: none;
 }
 
 
+#zoom-label:active,
+#zoom-label:focus {
+    outline: unset;
+    border-style: none;
+}
+
+#zoom-label::selection {
+    background-color: transparent;
+    color: inherit;
+}
+
+
+#brush-size {
+    color: #fff;
+    width: 2.5vw;
+    height: 100%;
+    text-align: center;
+    background-color: #4949497d;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: calc(var(--vwh, 1vh) * 1.17);
+    padding-top: calc(var(--vwh, 1vh) * (1.17 / 2));
+    border-color: #313131;
+    border-width: 2px;
+    border-style: solid;
 
 
 
-
-
-
-
+    background-color: #ff0000;
+    /* DEBUGGING PURPOSES ONLY */
+}
 
 
 
 /* Controls */
-#active {
-    border-bottom-style: solid;
-    border-color: #0000007d;
-    border-width: 2x;
+.active {
+    background-color: #007239;
 }
 
-#draw {
+.draw {
     background-color: #fff;
     filter: invert(1);
     border-radius: 50%;
@@ -337,11 +347,11 @@ img {
     border-width: 2px;
 }
 
-#draw:hover {
+.draw:hover {
     filter: opacity(0.5) invert(1);
 }
 
-#erase {
+.erase {
     filter: invert(1);
     background-color: #fff;
     border-radius: 50%;
@@ -351,20 +361,20 @@ img {
     border-width: 2px;
 }
 
-#erase:hover {
-    filter: opacity(0.5) grayscale(0.8);
+.erase:hover {
+    filter: opacity(0.5) invert(1);
 }
 
-#fill {
+.fill {
     background-color: #000000;
     border-radius: 50%;
     padding: 10px;
-    border-color: #cccccc7d;
+    border-color: #3333337d;
     border-style: solid;
     border-width: 2px;
     filter: grayscale(1);
 }
 
-#fill:hover {
+.fill:hover {
     filter: opacity(0.5) grayscale(0.8);
 }

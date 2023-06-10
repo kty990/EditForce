@@ -13,8 +13,37 @@ let DRAW_COLOR = "#000000";
 let BRUSH_SIZE = 2;
 
 let drawContext = null;
-
+let activeTool = {
+    'btn': null,
+    'type': null
+}
 // Set up event listeners and drawing context for the canvas
+
+let controls = document.getElementById("controls").children;
+for (let x = 0; x < controls.length; x++) {
+    controls[x].addEventListener("click", () => {
+        switchTool(controls[x].id);
+    })
+}
+
+function switchTool(name) {
+    const whitelist = [
+        'draw',
+        'fill',
+        'erase'
+    ]
+    if (!whitelist.includes(name.toLowerCase())) {
+        throw new Error(`Attempt to switch to tool with name "${name}" which does not exist`)
+    }
+    if (activeTool['btn'] != null && activeTool['type'] != null) {
+        activeTool['btn'].classList.remove("active");
+    }
+    activeTool = {
+        'btn': document.getElementById(name.toLowerCase()),
+        'type': name.toLowerCase()
+    }
+    activeTool['btn'].classList.add("active");
+}
 
 function switchCanvas(data) {
     /**
@@ -32,6 +61,7 @@ function switchCanvas(data) {
     }
     drawCanvas = data['canvas'];
     drawContext = drawCanvas.getContext('2d');
+    drawContext.willReadFrequently = true;
 
     drawCanvas.addEventListener("mousemove", move);
     drawCanvas.addEventListener("mousedown", down);
@@ -49,12 +79,15 @@ function draw() {
     drawContext.lineTo(currX, currY);
     drawContext.strokeStyle = DRAW_COLOR;
     drawContext.lineWidth = BRUSH_SIZE;
-    drawContext.stroke();
+    if (activeTool['type'] == "draw") {
+        drawContext.stroke();
+    } else if (activeTool['type'] == "erase") {
+        drawContext.clearRect(currX, currY, BRUSH_SIZE, BRUSH_SIZE);
+    }
     drawContext.closePath();
 }
 
 function findxy(res, e) {
-    console.log(`${res} pressed`)
     const getCanvas = (cs) => {
         for (let x = 0; x < canvases.length; x++) {
             let d = canvases[x];
@@ -73,16 +106,38 @@ function findxy(res, e) {
         flag = true;
         dot_flag = true;
         if (dot_flag) {
-            drawContext.beginPath();
-            drawContext.fillStyle = DRAW_COLOR;
-            drawContext.fillRect(currX, currY, 2, 2);
-            drawContext.closePath();
-            dot_flag = false;
+            if (activeTool != null) {
+                if (activeTool['type'] == 'draw') {
+                    DRAW_COLOR = "#000000";
+                    drawContext.beginPath();
+                    drawContext.fillStyle = DRAW_COLOR;
+                    drawContext.fillRect(currX, currY, 2, 2);
+                    drawContext.closePath();
+                    dot_flag = false;
 
 
-            let data = getCanvas(drawCanvas);
-            let img = data['label'].getElementsByTagName("img")[0];
-            img.src = drawCanvas.toDataURL();
+                    let data = getCanvas(drawCanvas);
+                    let img = data['label'].getElementsByTagName("img")[0];
+                    img.src = drawCanvas.toDataURL();
+                } else if (activeTool['type'] == 'erase') {
+                    DRAW_COLOR = "#00000000";
+                    drawContext.beginPath();
+                    drawContext.fillStyle = "#00000000";
+                    drawContext.clearRect(currX, currY, 2, 2);
+                    drawContext.closePath();
+                    dot_flag = false;
+
+
+                    let data = getCanvas(drawCanvas);
+                    let img = data['label'].getElementsByTagName("img")[0];
+                    img.src = drawCanvas.toDataURL();
+                } else if (activeTool['type'] == 'fill') {
+                    const color = getPixelColor(x, y).rgba;
+                    paintBucket(currX, currY, color);
+                    dot_flag = false;
+                    flag = false;
+                }
+            }
         }
     }
     if (res == 'up' || res == "out") {
@@ -188,7 +243,7 @@ function getPixelColor(x, y) {
     const color = {
         rgba: `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3]})`,
         rgb: `rgb(${data[0]}, ${data[1]}, ${data[2]})`,
-        hex: rgbToHex(data[0], data[1], data[2], data[3])
+        hex: rgbaToHex(data[0], data[1], data[2], data[3])
     };
     return color;
 }
@@ -224,30 +279,33 @@ function removeAlpha(color) {
 
 // Function to set the color of a pixel at (x, y)
 function setPixelColor(x, y, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, 1, 1);
+    drawContext.fillStyle = color;
+    drawContext.fillRect(x, y, 1, 1);
 }
 
 // Function to perform paint bucket fill
 function paintBucket(x, y, color) {
-    // THIS IS THE CHATGPT version. Modify it to fit with my code
-    let fillColor = removeAlpha(color);
+    const fillColor = removeAlpha(color);
 
     const initialColor = getPixelColor(x, y);
-    if (initialColor['hex'] === fillColor || initialColor['rgb'] == fillColor) {
-        // If the initial and fill colors are the same, no need to proceed
+    const targetColor = initialColor.hex;
+
+    if (targetColor === fillColor) {
+        // If the target color and fill color are the same, no need to proceed
         return;
     }
 
     const stack = [];
+    const visited = [];
     stack.push({ x, y });
 
     while (stack.length > 0) {
         const { x, y } = stack.pop();
         const currentColor = getPixelColor(x, y);
 
-        if (currentColor === initialColor) {
+        if (currentColor.hex === targetColor && !visited.includes(`${x},${y}`)) {
             setPixelColor(x, y, fillColor);
+            visited.push(`${x},${y}`);
 
             // Check the four neighboring pixels
             if (x > 0) stack.push({ x: x - 1, y });
@@ -258,6 +316,9 @@ function paintBucket(x, y, color) {
     }
 }
 
+
+
+
 ////////////// DEBUGING ///////////////////////
 
 let debug_div = document.getElementById("debug");
@@ -265,6 +326,7 @@ let down_p = document.getElementById("down");
 let moving_p = document.getElementById("moving");
 let exists_p = document.getElementById("exists");
 let size_p = document.getElementById("size");
+let mode_p = document.getElementById("mode");
 
 function wait(ms) {
     return new Promise((resolve, reject) => {
@@ -279,7 +341,8 @@ async function debug() {
         await wait(100);
         down_p.textContent = `Down: ${flag}`;
         moving_p.textContent = `Moving: ${moving}`;
-        exists_p.textContent = `Exists: ${drawCanvas !== null && drawCanvas !== undefined}`
+        exists_p.textContent = `Exists: ${drawCanvas !== null && drawCanvas !== undefined}`;
+        mode_p.textContent = `Mode: ${activeTool['type']}`
         if (drawCanvas) {
             let cS = window.getComputedStyle(drawCanvas);
             let w = parseInt(cS.width.replace("px", ""));

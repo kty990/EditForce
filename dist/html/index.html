@@ -19,18 +19,17 @@
         </div>
     </div>
     <div id="controls">
-        <img src="../images/brush.png" alt="draw" id="draw">
-        <img src="../images/eraser.png" alt="IMG" id="erase">
-        <img src="../images/paint.png" alt="IMG" id="fill">
+        <img src="../images/brush.png" alt="draw" class="draw" id="draw">
+        <img src="../images/eraser.png" alt="IMG" class="erase" id="erase">
+        <img src="../images/paint.png" alt="IMG" class="fill" id="fill">
     </div>
     <div id="canvas-backdrop">
         <canvas id="default_canvas"></canvas>
     </div>
 
     <div id="canvas-properties">
-        <div id="zoom-label" contentEditable=true>
-            100%
-        </div>
+        <input id="zoom-label" value="100%">
+        <div id="brush-size">2</div>
     </div>
 
     <div id="debug">
@@ -38,6 +37,7 @@
         <p id="moving"></p>
         <p id="exists"></p>
         <p id="size"></p>
+        <p id="mode"></p>
     </div>
 
     <div id="properties">
@@ -66,7 +66,7 @@
     <script src="../js/backend.js"></script>
     <script src="../js/controls.js"></script>
     <script src="../js/backCSS.js"></script>
-    <script src="../js/core.js"></script>
+    <!-- <script src="../js/core.js"></script> -->
 </body>
 
 </html>
