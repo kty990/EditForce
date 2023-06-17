@@ -16,14 +16,15 @@ let drawContext = null;
 let activeTool = {
     'btn': null,
     'type': null
-}
+};
+
 // Set up event listeners and drawing context for the canvas
 
 let controls = document.getElementById("controls").children;
 for (let x = 0; x < controls.length; x++) {
     controls[x].addEventListener("click", () => {
         switchTool(controls[x].id);
-    })
+    });
 }
 
 function switchTool(name) {
@@ -31,9 +32,9 @@ function switchTool(name) {
         'draw',
         'fill',
         'erase'
-    ]
+    ];
     if (!whitelist.includes(name.toLowerCase())) {
-        throw new Error(`Attempt to switch to tool with name "${name}" which does not exist`)
+        throw new Error(`Attempt to switch to tool with name "${name}" which does not exist`);
     }
     if (activeTool['btn'] != null && activeTool['type'] != null) {
         activeTool['btn'].classList.remove("active");
@@ -41,17 +42,11 @@ function switchTool(name) {
     activeTool = {
         'btn': document.getElementById(name.toLowerCase()),
         'type': name.toLowerCase()
-    }
+    };
     activeTool['btn'].classList.add("active");
 }
 
 function switchCanvas(data) {
-    /**
-     * 
-     * TODO:
-     * - Make the 'draw' symbol and set one of the control buttons to 'draw', and another to 'erase'
-     * - Check for press of each control and update accordingly.
-     */
     console.log("Switching to ", data);
     if (drawCanvas) {
         drawCanvas.removeEventListener("mousemove", move);
@@ -61,7 +56,7 @@ function switchCanvas(data) {
     }
     drawCanvas = data['canvas'];
     drawContext = drawCanvas.getContext('2d');
-    drawContext.willReadFrequently = true;
+    drawContext.willReadFrequently = true; // Move this line here
 
     drawCanvas.addEventListener("mousemove", move);
     drawCanvas.addEventListener("mousedown", down);
@@ -88,15 +83,6 @@ function draw() {
 }
 
 function findxy(res, e) {
-    const getCanvas = (cs) => {
-        for (let x = 0; x < canvases.length; x++) {
-            let d = canvases[x];
-            if (d['canvas'] == cs) {
-                return d;
-            }
-        }
-        return null;
-    }
     if (res == 'down') {
         prevX = currX;
         prevY = currY;
@@ -115,40 +101,91 @@ function findxy(res, e) {
                     drawContext.closePath();
                     dot_flag = false;
 
-
-                    let data = getCanvas(drawCanvas);
-                    let img = data['label'].getElementsByTagName("img")[0];
+                    let img = new Image();
                     img.src = drawCanvas.toDataURL();
+                    let data = getCanvas(drawCanvas);
+                    let label = data['label'];
+                    label.innerHTML = '';
+                    label.appendChild(img);
                 } else if (activeTool['type'] == 'erase') {
                     DRAW_COLOR = "#00000000";
                     drawContext.beginPath();
-                    drawContext.fillStyle = "#00000000";
                     drawContext.clearRect(currX, currY, 2, 2);
                     drawContext.closePath();
                     dot_flag = false;
 
-
-                    let data = getCanvas(drawCanvas);
-                    let img = data['label'].getElementsByTagName("img")[0];
+                    let img = new Image();
                     img.src = drawCanvas.toDataURL();
+                    let data = getCanvas(drawCanvas);
+                    let label = data['label'];
+                    label.innerHTML = '';
+                    label.appendChild(img);
                 } else if (activeTool['type'] == 'fill') {
-                    const color = getPixelColor(x, y).rgba;
-                    paintBucket(currX, currY, color);
-                    dot_flag = false;
-                    flag = false;
+                    const imageData = drawContext.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
+                    const pixelStack = [];
+                    const startPixel = (currY * imageData.width + currX) * 4;
+                    const startColor = Array.from(imageData.data.slice(startPixel, startPixel + 4));
+
+                    const matchColor = (pixel) => {
+                        for (let i = 0; i < 4; i++) {
+                            if (pixel[i] !== startColor[i]) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    };
+
+                    const setPixelColor = (pixel, color) => {
+                        for (let i = 0; i < 4; i++) {
+                            pixel[i] = color[i];
+                        }
+                    };
+
+                    const pushPixel = (x, y) => {
+                        if (x >= 0 && x < imageData.width && y >= 0 && y < imageData.height) {
+                            const pixelIndex = (y * imageData.width + x) * 4;
+                            if (matchColor(imageData.data.slice(pixelIndex, pixelIndex + 4))) {
+                                pixelStack.push([x, y]);
+                            }
+                        }
+                    };
+
+                    if (!matchColor(startColor)) {
+                        return;
+                    }
+
+                    pixelStack.push([currX, currY]);
+
+                    while (pixelStack.length > 0) {
+                        const [x, y] = pixelStack.pop();
+                        const pixelIndex = (y * imageData.width + x) * 4;
+
+                        if (matchColor(imageData.data.slice(pixelIndex, pixelIndex + 4))) {
+                            setPixelColor(imageData.data.slice(pixelIndex, pixelIndex + 4), DRAW_COLOR);
+
+                            pushPixel(x + 1, y);
+                            pushPixel(x - 1, y);
+                            pushPixel(x, y + 1);
+                            pushPixel(x, y - 1);
+                        }
+                    }
+
+                    drawContext.putImageData(imageData, 0, 0);
+
+                    let img = new Image();
+                    img.src = drawCanvas.toDataURL();
+                    let data = getCanvas(drawCanvas);
+                    let label = data['label'];
+                    label.innerHTML = '';
+                    label.appendChild(img);
                 }
             }
         }
     }
     if (res == 'up' || res == "out") {
         flag = false;
-
-        let data = getCanvas(drawCanvas);
-        let img = data['label'].getElementsByTagName("img")[0];
-        img.src = drawCanvas.toDataURL();
     }
     if (res == 'move') {
-        moving = true;
         if (flag) {
             prevX = currX;
             prevY = currY;
@@ -156,166 +193,43 @@ function findxy(res, e) {
             currY = e.clientY - drawCanvas.offsetTop;
             draw();
         }
-    } else {
-        moving = false;
     }
 }
 
-// Event handlers
-
-const move = (e) => {
+function move(e) {
     findxy('move', e);
 }
 
-const down = (e) => {
+function down(e) {
     findxy('down', e);
 }
 
-const up = (e) => {
+function up(e) {
     findxy('up', e);
 }
 
-const out = (e) => {
+function out(e) {
     findxy('out', e);
 }
 
+// Utility functions
 
-// Store the current drawing
-let savedImageData = null;
-let previousDimensions = {
-    'x': 0,
-    'y': 0
-}
-
-function saveCanvasData() {
-    savedImageData = drawContext.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
-}
-
-function restoreCanvasData() {
-    if (savedImageData) {
-        drawContext.putImageData(savedImageData, 0, 0);
-    }
-}
-
-function rsz() { // on resize
-    if (drawCanvas) {
-
-        let cS = window.getComputedStyle(drawCanvas);
-        let w = parseInt(cS.width.replace("px", ""));
-        let h = parseInt(cS.height.replace("px", ""));
-        if (previousDimensions['x'] < w && previousDimensions['y'] < h) {
-            previousDimensions = {
-                'x': w,
-                'y': h
-            }
-            saveCanvasData()
-            // Define the size of the canvas
-            drawCanvas.width = w;
-            drawCanvas.height = h;
-            restoreCanvasData();
-        }
-
-    }
-}
-
-window.addEventListener('resize', () => {
-    rsz();
-})
-
-function rgbaToHex(red, green, blue, alpha) {
-    const rHex = red.toString(16).padStart(2, '0');
-    const gHex = green.toString(16).padStart(2, '0');
-    const bHex = blue.toString(16).padStart(2, '0');
-    const aHex = Math.round(alpha * 255).toString(16).padStart(2, '0');
-    return `#${rHex}${gHex}${bHex}${aHex}`;
-}
-
-function rgbToHex(red, green, blue) {
-    const rHex = red.toString(16).padStart(2, '0');
-    const gHex = green.toString(16).padStart(2, '0');
-    const bHex = blue.toString(16).padStart(2, '0');
-    return `#${rHex}${gHex}${bHex}`;
-}
-
-function getPixelColor(x, y) {
-    const imageData = drawContext.getImageData(x, y, 1, 1);
-    const data = imageData.data;
-    const color = {
-        rgba: `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3]})`,
-        rgb: `rgb(${data[0]}, ${data[1]}, ${data[2]})`,
-        hex: rgbaToHex(data[0], data[1], data[2], data[3])
-    };
-    return color;
-}
-
-function removeAlpha(color) {
-    // Check if the color is in RGBA format
-    if (color.startsWith("rgba")) {
-        const rgbaRegex = /rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+(\.\d+)?)\)/;
-        const matches = color.match(rgbaRegex);
-        if (matches) {
-            const red = parseInt(matches[1]);
-            const green = parseInt(matches[2]);
-            const blue = parseInt(matches[3]);
-            return `rgb(${red}, ${green}, ${blue})`;
+const getCanvas = (cs) => {
+    for (let x = 0; x < canvases.length; x++) {
+        let d = canvases[x];
+        if (d['canvas'] == cs) {
+            return d;
         }
     }
-
-    // Check if the color is in HEX format
-    if (color.startsWith("#")) {
-        const hexRegex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i;
-        const matches = color.match(hexRegex);
-        if (matches) {
-            const red = parseInt(matches[1], 16);
-            const green = parseInt(matches[2], 16);
-            const blue = parseInt(matches[3], 16);
-            return `#${(red << 16 | green << 8 | blue).toString(16).padStart(6, '0')}`;
-        }
-    }
-
-    // Return the color unchanged if it's not in RGBA or HEX format
-    return color;
+    return null;
 }
 
-// Function to set the color of a pixel at (x, y)
-function setPixelColor(x, y, color) {
-    drawContext.fillStyle = color;
-    drawContext.fillRect(x, y, 1, 1);
+function rsz() {
+    drawContext.canvas.width = drawCanvas.offsetWidth;
+    drawContext.canvas.height = drawCanvas.offsetHeight;
 }
 
-// Function to perform paint bucket fill
-function paintBucket(x, y, color) {
-    const fillColor = removeAlpha(color);
-
-    const initialColor = getPixelColor(x, y);
-    const targetColor = initialColor.hex;
-
-    if (targetColor === fillColor) {
-        // If the target color and fill color are the same, no need to proceed
-        return;
-    }
-
-    const stack = [];
-    const visited = [];
-    stack.push({ x, y });
-
-    while (stack.length > 0) {
-        const { x, y } = stack.pop();
-        const currentColor = getPixelColor(x, y);
-
-        if (currentColor.hex === targetColor && !visited.includes(`${x},${y}`)) {
-            setPixelColor(x, y, fillColor);
-            visited.push(`${x},${y}`);
-
-            // Check the four neighboring pixels
-            if (x > 0) stack.push({ x: x - 1, y });
-            if (x < drawCanvas.width - 1) stack.push({ x: x + 1, y });
-            if (y > 0) stack.push({ x, y: y - 1 });
-            if (y < drawCanvas.height - 1) stack.push({ x, y: y + 1 });
-        }
-    }
-}
-
+window.addEventListener('resize', rsz);
 
 
 

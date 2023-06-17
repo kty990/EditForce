@@ -1,8 +1,19 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
 const path = require('path');
-const config = require("../config.json");
+const config = require("./dist/config.json");
+const fs = require('fs');
 
 const EXTENSION = "mie"
+let DEFAULT_FILE_DATA = {
+    "layers": [
+        {
+            "name": "test_layer",
+            "z-index": 0,
+            "dataURL": "NO DATA URL"
+        }
+    ]
+}
+DEFAULT_FILE_DATA = JSON.stringify(DEFAULT_FILE_DATA)
 
 class GraphicsWindow {
     constructor() {
@@ -10,6 +21,8 @@ class GraphicsWindow {
         this.current_z_index = 0;
         this.layers = []; // List to store layers
         this.active_layer = null; // Currently active layer
+
+        this.currentProject = null; this.currentProject = null;
 
         app.on('ready', () => {
             this.createWindow();
@@ -25,12 +38,12 @@ class GraphicsWindow {
             webPreferences: {
                 nodeIntegration: true,
                 spellcheck: false,
-                preload: path.join(__dirname, 'preload.js')
+                preload: path.join(__dirname, './dist/js/preload.js')
             },
         });
 
         // Set the window icon
-        const iconPath = path.join(__dirname, '../images/icon.png');
+        const iconPath = path.join(__dirname, './dist/images/icon.png');
         this.window.setIcon(iconPath);
 
         const placeholder = (prompt) => {
@@ -64,17 +77,93 @@ class GraphicsWindow {
             this.window.webContents.send('export-client', result.filePath);
         }
 
+        const newFile = async () => {
+            const result = await dialog.showSaveDialog({
+                title: 'New File',
+                buttonLabel: 'Save',
+                filters: [
+                    { name: 'Project Files', extensions: [EXTENSION] }
+                ]
+            })
+
+            try {
+                fs.writeFile(result.filePath, DEFAULT_FILE_DATA, (err) => {
+                    if (err) {
+                        console.error('An error occurred:', err);
+                    } else {
+                        console.log('File saved successfully!');
+                    }
+                });
+                this.window.webContents.send('open-client', result.filePath);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        const open = async () => {
+            const result = await dialog.showOpenDialog(this.window, {
+                filters: [
+                    { name: 'Project Files', extensions: [EXTENSION] }
+                ]
+            });
+            try {
+                fs.readFile(result.filePath, (err, data) => {
+                    if (err) {
+                        console.error('An error occurred:', err);
+                    } else {
+                        console.log('File read successfully!\t', atob(data));
+                        this.currentProject = result.filePath;
+                    }
+                })
+                this.window.webContents.send('open-client', result.filePath);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        const save = () => {
+            if (true) {
+                console.log("Save")
+            }
+        }
+
+        const saveas = () => {
+            if (true) {
+                let obj = {
+                    "layers": [
+                        {
+                            "name": "test_layer",
+                            "z-index": 0,
+                            "dataURL": "NO DATA URL"
+                        }
+                    ]
+                }
+                let jsn = JSON.stringify(obj);
+                console.log(jsn, typeof (jsn));
+                let encoded = btoa(jsn);
+                let decoded = atob(encoded);
+                console.log(encoded, "\t", decoded);
+                fs.writeFile('projectDataTest', encoded, (err) => {
+                    if (err) {
+                        console.error('An error occurred:', err);
+                    } else {
+                        console.log('File saved successfully!');
+                    }
+                });
+            }
+        }
+
 
         const menuTemplate = [
             {
                 label: 'File',
                 submenu: [
-                    { label: 'New', click: placeholder("New") },
-                    { label: 'Open', click: placeholder("Open") },
+                    { label: 'New', click: newFile },
+                    { label: 'Open', click: open },
                     { label: 'Refresh', role: 'reload' },
                     { type: 'separator' },
-                    { label: 'Save', click: placeholder("Save") },
-                    { label: 'Save As', click: placeholder("Save As") },
+                    { label: 'Save', click: save },
+                    { label: 'Save As', click: saveas },
                     { label: 'Export', click: exportImg },
                     { type: 'separator' },
                     { label: 'Exit', click: app.quit }
@@ -102,7 +191,7 @@ class GraphicsWindow {
 
         this.window.setMenu(menu);
 
-        this.window.loadFile('../html/index.html');
+        this.window.loadFile('./dist/html/index.html');
 
         this.window.on('closed', () => {
             this.window = null;
