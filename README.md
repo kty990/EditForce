@@ -22,7 +22,11 @@ Explain how to use the image editor, including a brief overview of the user inte
 
 ## Contributing
 
-Provide guidelines for contributing to the development of the image editor software. Include information on how to submit bug reports, feature requests, and pull requests.
+To contribute to this project, you can feel free to create a **pull request**. In the pull request, you must include the following information:
+
+- The reason for the pull request (often in the title)
+- A detailed description of how the changes will impact the front/back end.
+- If the pull request fixes an error from [Issues](https://github.com/kty990/EditForce/issues), please link it so that the issue can be closed if the pull request is accepted.
 
 ## License
 
