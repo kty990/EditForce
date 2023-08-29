@@ -34,11 +34,11 @@ Specify the license under which the image editor is released. Include any releva
 
 ## Acknowledgments
 
-Give credit to any external libraries, resources, or individuals who have contributed to the development of the image editor.
+- Electron (v26.1.0)
 
-## Troubleshooting
+## Troubleshooting / Error Reporting
 
-Include a section with common troubleshooting tips and solutions to known issues that users may encounter while using the image editor.
+- As much information as possible is important when reporting an error or attempting to troubleshoot
 
 ## Frequently Asked Questions (FAQ)
 
@@ -46,28 +46,29 @@ Provide a list of frequently asked questions along with their answers to address
 
 ## Support
 
-Include contact information or links to resources where users can seek additional support or assistance related to the image editor.
+ If you require support for this project, join [our Discord server](https://discord.gg/7YbWnNpsU5)
 
 ## Release Notes
 
-Highlight the major changes, enhancements, and bug fixes in each release of the image editor software.
+- When release notes are available, they will be found here or on [our Discord server](https://discord.gg/7YbWnNpsU5)
 
 ## Roadmap
 
-Outline the future development plans, upcoming features, and improvements that are planned for the image editor.
+- Future development plans, upcoming features, and improvements that are planned for the image editor.
+- Nothing is available as of yet, more information coming soon...!
 
 ## Authors
 
-List the names or organizations of the authors or contributors who have worked on the image editor.
+- kty990
 
 ## References
 
-Include any references or resources that have been used in the development of the image editor, such as tutorials, documentation, or external libraries.
+- Electron (v26.1.0)
 
 ## Changelog
 
-Maintain a detailed changelog documenting the version history, release dates, and specific changes made in each version of the image editor.
+- Detailed changelog documenting the version history, release dates, and specific changes made in each version of this program.
 
 ## Legal Disclaimer
 
-Include a legal disclaimer that clarifies the software's limitations and disclaims any liabilities or warranties associated with its use.
+- Coming soon...!
